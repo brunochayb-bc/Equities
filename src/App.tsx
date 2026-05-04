@@ -14,7 +14,14 @@ import {
   Calendar,
   Clock,
   Activity,
-  PieChart
+  PieChart,
+  Menu,
+  Home,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react';
 import { PETROBRAS_DATA } from './data';
 import { CompanyData } from './types';
@@ -73,9 +80,11 @@ const InfoTooltip = ({ label, align = 'center' }: { label: string, align?: 'left
 };
 const Header = ({ 
   onSearch, 
-  isLoading,
+  onToggleSidebar,
+  isLoading, 
 }: { 
   onSearch: (ticker: string) => void,
+  onToggleSidebar: () => void,
   isLoading: boolean,
 }) => {
   const [searchInput, setSearchInput] = useState('');
@@ -90,6 +99,12 @@ const Header = ({
 
   return (
     <div className="flex items-center px-7 py-5 gap-6 border-b border-border bg-[#0a0c12]">
+      <button 
+        onClick={onToggleSidebar}
+        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-text-3 hover:text-accent"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
       <div className="flex-1 max-w-xl mx-auto">
         <form onSubmit={handleSubmit} className="relative group">
           <input 
@@ -868,11 +883,81 @@ const Footer = ({ text }: { text: string }) => (
 
 // --- Main Component ---
 
+const SidebarItem = ({ icon: Icon, label, active, collapsed, onClick }: any) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all group ${active ? 'bg-accent text-bg-2 shadow-[0_0_20px_rgba(201,255,61,0.2)]' : 'text-text-3 hover:bg-white/5 hover:text-text'}`}
+  >
+    <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-bg-2' : 'group-hover:text-accent transition-colors'}`} />
+    {!collapsed && (
+      <span className="font-mono text-[11px] tracking-[0.2em] font-black uppercase whitespace-nowrap overflow-hidden">
+        {label}
+      </span>
+    )}
+  </button>
+);
+
+const Sidebar = ({ activeView, setActiveView, collapsed, setCollapsed }: any) => {
+  return (
+    <motion.div 
+      initial={false}
+      animate={{ width: collapsed ? 80 : 280 }}
+      className="h-screen bg-[#05070a] border-r border-border flex flex-col sticky top-0 z-50 transition-all"
+    >
+      <div className="p-6 flex items-center justify-between">
+        {!collapsed && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-accent font-mono text-[14px] font-black tracking-[0.3em] uppercase"
+          >
+            Investment Management
+          </motion.div>
+        )}
+        <button 
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 hover:bg-white/5 rounded-lg text-text-3 transition-colors ml-auto"
+        >
+          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
+      </div>
+
+      <div className="px-4 py-8 flex flex-col gap-2">
+        <SidebarItem 
+          icon={Home} 
+          label="Equities Research" 
+          active={activeView === 'research'} 
+          collapsed={collapsed}
+          onClick={() => setActiveView('research')}
+        />
+        <SidebarItem 
+          icon={Briefcase} 
+          label="Carteira Recomendada" 
+          active={activeView === 'portfolio'} 
+          collapsed={collapsed}
+          onClick={() => setActiveView('portfolio')}
+        />
+      </div>
+
+      <div className="mt-auto p-4 border-t border-border/30">
+        {!collapsed && (
+          <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10">
+            <div className="text-[10px] text-accent font-black tracking-widest uppercase mb-1">PRO PLAN</div>
+            <div className="text-[9px] text-text-3 font-bold uppercase">Acesso Ilimitado</div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
 export default function App() {
   const [data, setData] = useState<CompanyData>(PETROBRAS_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [activeView, setActiveView] = useState<'research' | 'portfolio'>('research');
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleCopy = () => {
     const text = buildTextReport(data);
@@ -883,6 +968,7 @@ export default function App() {
   };
 
   const handleSearch = async (ticker: string) => {
+    setActiveView('research');
     setIsLoading(true);
     setError(null);
     try {
@@ -898,95 +984,131 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 md:px-10 overflow-x-hidden selection:bg-accent selection:text-bg-2 bg-[#050608]">
-      <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
-        <AnimatePresence mode="wait">
-          {error && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-red/10 border-2 border-red/30 rounded-2xl p-6 flex items-center justify-between shadow-2xl"
-            >
-              <div className="flex items-center gap-4 text-red font-mono text-[13px] font-bold tracking-widest">
-                <AlertTriangle className="w-6 h-6" />
-                {error}
-              </div>
-              <button className="cursor-pointer hover:rotate-90 transition-transform" onClick={() => setError(null)}><X className="w-6 h-6 text-text-3" /></button>
-            </motion.div>
-          )}
+    <div className="min-h-screen selection:bg-accent selection:text-bg-2 bg-[#050608] flex overflow-x-hidden">
+      <Sidebar 
+        activeView={activeView} 
+        setActiveView={setActiveView} 
+        collapsed={collapsed} 
+        setCollapsed={setCollapsed} 
+      />
 
-          {isLoading ? (
+      <main className="flex-1 min-w-0 transition-all duration-300">
+        <AnimatePresence mode="wait">
+          {activeView === 'research' ? (
             <motion.div 
-              key="loading"
+              key="research"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.02 }}
-              className="page min-h-[750px] flex flex-col items-center justify-center p-12 text-center"
+              transition={{ duration: 0.3 }}
+              className="px-4 md:px-10 py-10"
             >
-              <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-                <div className="grid grid-cols-12 h-full gap-1">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div key={i} className="border-r-2 border-accent/15" />
-                  ))}
-                </div>
-              </div>
-              <div className="w-36 h-36 rounded-3xl bg-panel-2 border-4 border-accent/20 grid place-items-center mb-10 relative">
-                <RefreshCw className="w-16 h-16 text-accent animate-spin" />
-                <div className="absolute inset-0 rounded-3xl animate-pulse bg-accent/10 border-accent/40" />
-              </div>
-              <div className="font-mono text-4xl text-white font-black tracking-tighter uppercase mb-4">Processando Inteligência B3</div>
-              <div className="text-accent/60 font-mono text-[14px] tracking-[0.3em] font-bold max-w-xl leading-loose uppercase whitespace-pre-wrap">
-                ANALISANDO DADOS DE 2026 · CALCULANDO VOLATILIDADE{'\n'}AVALIANDO FUNDAMENTOS · CALIBRANDO SCORE ALPHA
+              <div className="max-w-[1440px] mx-auto flex flex-col gap-10">
+                <AnimatePresence mode="wait">
+                  {error && (
+                    <motion.div 
+                      key="error"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="bg-red/10 border-2 border-red/30 rounded-2xl p-6 flex items-center justify-between shadow-2xl"
+                    >
+                      <div className="flex items-center gap-4 text-red font-mono text-[13px] font-bold tracking-widest">
+                        <AlertTriangle className="w-6 h-6" />
+                        {error}
+                      </div>
+                      <button className="cursor-pointer hover:rotate-90 transition-transform" onClick={() => setError(null)}><X className="w-6 h-6 text-text-3" /></button>
+                    </motion.div>
+                  )}
+
+                  {isLoading ? (
+                    <motion.div 
+                      key="loading"
+                      className="page min-h-[750px] flex flex-col items-center justify-center p-12 text-center"
+                    >
+                      <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+                        <div className="grid grid-cols-12 h-full gap-1">
+                          {Array.from({ length: 12 }).map((_, i) => (
+                            <div key={i} className="border-r-2 border-accent/15" />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="w-36 h-36 rounded-3xl bg-panel-2 border-4 border-accent/20 grid place-items-center mb-10 relative">
+                        <RefreshCw className="w-16 h-16 text-accent animate-spin" />
+                        <div className="absolute inset-0 rounded-3xl animate-pulse bg-accent/10 border-accent/40" />
+                      </div>
+                      <div className="font-mono text-4xl text-white font-black tracking-tighter uppercase mb-4">Processando Inteligência B3</div>
+                      <div className="text-accent/60 font-mono text-[14px] tracking-[0.3em] font-bold max-w-xl leading-loose uppercase whitespace-pre-wrap">
+                        ANALISANDO DADOS DE 2026 · CALCULANDO VOLATILIDADE{'\n'}AVALIANDO FUNDAMENTOS · CALIBRANDO SCORE ALPHA
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="content"
+                      className="flex flex-col"
+                    >
+                      <div className="page" id="main-report">
+                        <Header 
+                          onSearch={handleSearch} 
+                          onToggleSidebar={() => setCollapsed(!collapsed)}
+                          isLoading={isLoading} 
+                        />
+                        <StockBar data={data} />
+                        <HighlightsStrip data={data} />
+
+                        <div className="flex flex-col border-b border-border bg-[#0d1117]">
+                          <div className="grid md:grid-cols-[1fr_auto]">
+                            <PriceChart data={data} />
+                            <RiskGauge data={data} />
+                          </div>
+                          <SecondaryMetrics data={data} />
+                        </div>
+
+                        <KpiStrip data={data} />
+
+                        <div className="grid grid-cols-1 divide-y divide-border bg-[#080a0f]">
+                          <MetricSection title="ANÁLISE DE VALUATION" data={data.valuation} />
+                          <MetricSection title="SAÚDE FINANCEIRA" data={data.health} />
+                          <MetricSection title="POTENCIAL DE CRESCIMENTO" data={data.growth} />
+                        </div>
+
+                        <BreakdownSection data={data} />
+                        
+                        <div className="bg-[#050608]">
+                          <QuarterlyTable data={data} />
+                          <EarningsAndDelivery data={data} />
+                          <CatalystsVsRisks data={data} />
+                          <BottomLine data={data} />
+                        </div>
+
+                        <Footer text="Fonte: Dados públicos B3, CVM, Anbima." />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           ) : (
             <motion.div 
-              key="content"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col"
+              key="portfolio"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="p-20 flex flex-col items-center justify-center h-full min-h-screen text-center flex-1"
             >
-              <div className="page" id="main-report">
-                <Header 
-                  onSearch={handleSearch} 
-                  isLoading={isLoading} 
-                />
-                <StockBar data={data} />
-                <HighlightsStrip data={data} />
-
-                <div className="flex flex-col border-b border-border bg-[#0d1117]">
-                  <div className="grid md:grid-cols-[1fr_auto]">
-                    <PriceChart data={data} />
-                    <RiskGauge data={data} />
-                  </div>
-                  <SecondaryMetrics data={data} />
-                </div>
-
-                <KpiStrip data={data} />
-
-                <div className="grid grid-cols-1 divide-y divide-border bg-[#080a0f]">
-                  <MetricSection title="ANÁLISE DE VALUATION" data={data.valuation} />
-                  <MetricSection title="SAÚDE FINANCEIRA" data={data.health} />
-                  <MetricSection title="POTENCIAL DE CRESCIMENTO" data={data.growth} />
-                </div>
-
-                <BreakdownSection data={data} />
-                
-                <div className="bg-[#050608]">
-                  <QuarterlyTable data={data} />
-                  <EarningsAndDelivery data={data} />
-                  <CatalystsVsRisks data={data} />
-                  <BottomLine data={data} />
-                </div>
-
-                <Footer text="Fonte: Dados públicos B3, CVM, Anbima." />
+              <Briefcase className="w-24 h-24 text-accent/20 mb-8" />
+              <h1 className="text-6xl font-black tracking-tighter text-text-2 mb-4 uppercase">Carteira Recomendada</h1>
+              <p className="text-xl text-text-3 font-mono tracking-widest uppercase">Estruturando dados estratégicos...</p>
+              <div className="mt-12 p-10 border-2 border-dashed border-border rounded-3xl max-w-2xl bg-panel/10">
+                <p className="leading-relaxed text-text-3 font-mono text-sm tracking-wide uppercase">
+                  Estamos processando modelos de alocação dinâmica e balanceamento de risco com base em inteligência artificial proprietária. Disponível em breve para assinantes Pro.
+                </p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </main>
 
       <AnimatePresence>
         {showToast && (

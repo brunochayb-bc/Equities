@@ -141,14 +141,14 @@ export const GLOSSARY: Record<string, { label: string; desc: string; calc?: stri
     calc: "CAGR de Receita e Lucro + Indicadores de Tendência de Preço."
   },
   "ALPHA SCORE": {
-    label: "Alpha Intel Score",
+    label: "Investment Management Score",
     desc: "Nota proprietária de 0 a 100 que pondera Valuation, Saúde e Crescimento para definir o risco.",
     calc: "Média Ponderada (Valuation 35% + Saúde 35% + Crescimento 30%)"
   },
   "COMPOSIÇÃO DO ALPHA SCORE": {
     label: "Composição Alpha Score",
     desc: "Detalhamento de como a nota final é calculada com base nos pilares fundamentais da empresa.",
-    calc: "Média Ponderada dos pilares do modelo Alpha Intel."
+    calc: "Média Ponderada dos pilares do modelo Investment Management."
   },
   "HISTÓRICO TRIMESTRAL": {
     label: "Histórico Financeiro",
