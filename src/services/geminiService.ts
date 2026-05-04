@@ -1,7 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CompanyData } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("A chave de API Gemini (GEMINI_API_KEY) não foi configurada. No Vercel, adicione-a nas configurações de 'Environment Variables'.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 const RESPONSE_SCHEMA = {
   type: Type.OBJECT,
@@ -301,6 +312,7 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
   `;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
