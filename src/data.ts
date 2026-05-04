@@ -10,6 +10,7 @@ export const PETROBRAS_DATA: CompanyData = {
   },
   "highlights": {
     "marketCap": "R$ 548,2B",
+    "marketCapHistory": [520.1, 515.4, 532.8, 548.2],
     "equity": "R$ 412,5B",
     "netIncome": "R$ 114,6B",
     "revenue": "R$ 497,5B"

@@ -37,6 +37,25 @@ import {
 
 // --- Sub-Components ---
 
+const Sparkline = ({ data, color = "#c9ff3d" }: { data: number[], color?: string }) => {
+  if (!data || data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const points = data.map((v, i) => ({
+    x: (i / (data.length - 1)) * 60,
+    y: 20 - ((v - min) / range) * 16
+  }));
+  
+  const path = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')}`;
+  
+  return (
+    <svg width="60" height="20" className="opacity-60 group-hover:opacity-100 transition-opacity">
+      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+};
+
 const InfoTooltip = ({ label, align = 'center' }: { label: string, align?: 'left' | 'right' | 'center' }) => {
   const info = GLOSSARY[label.toUpperCase()] || GLOSSARY[label] || null;
   if (!info) return null;
@@ -270,12 +289,22 @@ const SecondaryMetrics = ({ data }: { data: CompanyData }) => {
 
 const HighlightsStrip = ({ data }: { data: CompanyData }) => (
   <div className="grid grid-cols-2 md:grid-cols-4 border-b border-border divide-x divide-border bg-[#0d1117]">
-    <div className="p-6 flex flex-col gap-2 group hover:bg-white/[0.02] transition-all">
-      <div className="text-[10px] text-accent font-black tracking-[0.25em] uppercase opacity-80 flex items-center">
-        VALOR DE MERCADO
-        <InfoTooltip label="MARKET CAP" align="left" />
+    <div className="p-6 flex flex-col gap-2 group hover:bg-white/[0.02] transition-all relative overflow-hidden">
+      <div className="flex justify-between items-start">
+        <div className="text-[10px] text-accent font-black tracking-[0.25em] uppercase opacity-80 flex items-center">
+          VALOR DE MERCADO
+          <InfoTooltip label="MARKET CAP" align="left" />
+        </div>
+        {data.highlights.marketCapHistory && (
+          <Sparkline data={data.highlights.marketCapHistory} />
+        )}
       </div>
       <div className="font-mono text-2xl text-text font-black group-hover:text-white transition-colors">{data.highlights.marketCap}</div>
+      {data.highlights.marketCapHistory && data.highlights.marketCapHistory.length >= 2 && (
+        <div className="text-[9px] font-mono text-text-3 font-bold uppercase tracking-wider">
+          TREND 4Q: {((data.highlights.marketCapHistory[data.highlights.marketCapHistory.length - 1] / data.highlights.marketCapHistory[0] - 1) * 100).toFixed(1)}%
+        </div>
+      )}
     </div>
     <div className="p-6 flex flex-col gap-2 group hover:bg-white/[0.02] transition-all">
       <div className="text-[10px] text-accent font-black tracking-[0.25em] uppercase opacity-80 flex items-center">

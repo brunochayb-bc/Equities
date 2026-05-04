@@ -32,11 +32,12 @@ const RESPONSE_SCHEMA = {
       type: Type.OBJECT,
       properties: {
         marketCap: { type: Type.STRING },
+        marketCapHistory: { type: Type.ARRAY, items: { type: Type.NUMBER }, description: "Market Cap in billions over the last 4 quarters." },
         equity: { type: Type.STRING },
         netIncome: { type: Type.STRING },
         revenue: { type: Type.STRING }
       },
-      required: ["marketCap", "equity", "netIncome", "revenue"]
+      required: ["marketCap", "marketCapHistory", "equity", "netIncome", "revenue"]
     },
     stock: {
       type: Type.OBJECT,
@@ -298,6 +299,8 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
     9. Riscos e Catalisadores: Forneça exatamente 5 pontos para cada, em PORTUGUÊS.
     10. Todos os valores monetários DEVEM estar em BRL (R$), formatados conforme o padrão brasileiro (ex: R$ 1.234,56). Use ponto como separador de milhar e vírgula como separador decimal nos campos de string.
     11. O campo 'meta.currency' deve ser sempre 'BRL'.
+    
+    12. Highlights: Inclua o histórico do Valor de Mercado (marketCapHistory) como um array de 4 números representando os últimos 4 trimestres em bilhões (BRL).
     
     FONTES DE DADOS OBRIGATÓRIAS:
     - Use a Pesquisa do Google para extrair dados em tempo real da B3 (Bolsa Brasileira).

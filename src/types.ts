@@ -11,6 +11,7 @@ export interface CompanyData {
     equity: string; // Patrimônio Líquido
     netIncome: string; // Lucro Líquido
     revenue: string; // Receita
+    marketCapHistory?: number[]; // Historic Market Cap for trend
   };
   stock: {
     price: string;
