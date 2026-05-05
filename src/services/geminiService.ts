@@ -5,8 +5,8 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    // We use import.meta.env which is the standard for Vite
-    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+    // Vite replaces process.env.GEMINI_API_KEY at build time via 'define' in vite.config.ts
+    const apiKey = process.env.GEMINI_API_KEY;
     
     if (!apiKey || apiKey === "undefined" || apiKey === "") {
       console.error("GEMINI_API_KEY is missing. Check your environment variables.");
@@ -321,24 +321,21 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
     const ai = getAI();
     console.log(`[Gemini] Generating report for ticker: ${ticker}...`);
     
-    // Explicitly use gemini-2.0-flash which is very stable and fast
-    const model = ai.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
-      generationConfig: {
+    const result = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
         responseMimeType: "application/json",
         responseSchema: RESPONSE_SCHEMA as any,
+        tools: [{ googleSearch: {} }] as any
       }
-    }, { apiVersion: 'v1beta' });
-
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      tools: [{ googleSearch: {} }] as any,
     });
 
-    const responseText = result.response.text();
-    if (!responseText) {
+    if (!result.text) {
       throw new Error("O modelo não retornou dados. Tente novamente.");
     }
+
+    const responseText = result.text;
 
     // Clean potential markdown blocks
     const cleanText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
