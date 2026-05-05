@@ -1004,9 +1004,9 @@ export default function App() {
       const report = await getCompanyReport(ticker);
       setData(report);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("FALHA AO GERAR RELATÓRIO PROFISSIONAL. VERIFIQUE O TICKER E TENTE NOVAMENTE.");
+      setError(err.message || "FALHA AO GERAR RELATÓRIO PROFISSIONAL. VERIFIQUE O TICKER E TENTE NOVAMENTE.");
     } finally {
       setIsLoading(false);
     }

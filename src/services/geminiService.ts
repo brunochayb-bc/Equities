@@ -317,7 +317,7 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
 
   try {
     const ai = getAI();
-    const response = await ai.models.generateContent({
+    const result = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
@@ -327,13 +327,28 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
       }
     });
 
-    if (!response.text) {
-      throw new Error("No response from Gemini");
+    if (!result.text) {
+      throw new Error("O modelo não retornou dados. Tente novamente.");
     }
 
-    return JSON.parse(response.text) as CompanyData;
-  } catch (error) {
+    // Clean potential markdown blocks
+    const cleanText = result.text.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    try {
+      return JSON.parse(cleanText) as CompanyData;
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response:", cleanText);
+      throw new Error("Erro ao processar os dados retornados pela IA. Tente outro ticker.");
+    }
+  } catch (error: any) {
     console.error("Error generating company report:", error);
+    // Provide user-friendly messages for common Gemini errors
+    if (error.message?.includes("API_KEY_INVALID")) {
+      throw new Error("Chave de API inválida. Verifique suas configurações.");
+    }
+    if (error.message?.includes("SAFETY")) {
+      throw new Error("A pesquisa foi bloqueada pelos filtros de segurança da IA.");
+    }
     throw error;
   }
 }
