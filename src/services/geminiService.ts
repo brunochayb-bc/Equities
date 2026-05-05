@@ -5,10 +5,12 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    const apiKey = typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined;
-    if (!apiKey) {
-      console.error("GEMINI_API_KEY is missing");
-      throw new Error("A chave de API Gemini (GEMINI_API_KEY) não foi detectada. Se estiver no AI Studio, adicione-a em Settings. Se estiver no Vercel, use as Environment Variables.");
+    // We use import.meta.env which is the standard for Vite
+    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+    
+    if (!apiKey || apiKey === "undefined" || apiKey === "") {
+      console.error("GEMINI_API_KEY is missing. Check your environment variables.");
+      throw new Error("API Key não encontrada. Se você estiver no VERCEL: 1. Adicione GEMINI_API_KEY nas Environment Variables do projeto. 2. Gere um NOVO DEPLOY (Redeploy) para que o sistema 'grave' a chave no código. No AI Studio: Adicione em 'Settings' > 'API Keys'.");
     }
     aiInstance = new GoogleGenAI({ apiKey });
   }
