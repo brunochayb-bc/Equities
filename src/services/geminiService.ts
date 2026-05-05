@@ -5,9 +5,10 @@ let aiInstance: GoogleGenAI | null = null;
 
 function getAI() {
   if (!aiInstance) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined;
     if (!apiKey) {
-      throw new Error("A chave de API Gemini (GEMINI_API_KEY) não foi configurada. No Vercel, adicione-a nas configurações de 'Environment Variables'.");
+      console.error("GEMINI_API_KEY is missing");
+      throw new Error("A chave de API Gemini (GEMINI_API_KEY) não foi detectada. Se estiver no AI Studio, adicione-a em Settings. Se estiver no Vercel, use as Environment Variables.");
     }
     aiInstance = new GoogleGenAI({ apiKey });
   }
