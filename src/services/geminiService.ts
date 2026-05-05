@@ -319,36 +319,51 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
 
   try {
     const ai = getAI();
-    const result = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
+    console.log(`[Gemini] Generating report for ticker: ${ticker}...`);
+    
+    // Explicitly use gemini-2.0-flash which is very stable and fast
+    const model = ai.getGenerativeModel({ 
+      model: "gemini-2.0-flash",
+      generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
-        tools: [{ googleSearch: {} }]
+        responseSchema: RESPONSE_SCHEMA as any,
       }
+    }, { apiVersion: 'v1beta' });
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      tools: [{ googleSearch: {} }] as any,
     });
 
-    if (!result.text) {
+    const responseText = result.response.text();
+    if (!responseText) {
       throw new Error("O modelo não retornou dados. Tente novamente.");
     }
 
     // Clean potential markdown blocks
-    const cleanText = result.text.replace(/```json/g, "").replace(/```/g, "").trim();
+    const cleanText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
     
     try {
-      return JSON.parse(cleanText) as CompanyData;
+      const parsed = JSON.parse(cleanText) as CompanyData;
+      console.log(`[Gemini] Report generated successfully for ${ticker}`);
+      return parsed;
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", cleanText);
       throw new Error("Erro ao processar os dados retornados pela IA. Tente outro ticker.");
     }
   } catch (error: any) {
     console.error("Error generating company report:", error);
+    
     // Provide user-friendly messages for common Gemini errors
-    if (error.message?.includes("API_KEY_INVALID")) {
+    const errorMsg = error.message || "";
+    
+    if (errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+      throw new Error("LIMITE DE USO ATINGIDO: Você excedeu a quota gratuita da API Gemini. Aguarde um minuto ou tente novamente mais tarde.");
+    }
+    if (errorMsg.includes("API_KEY_INVALID")) {
       throw new Error("Chave de API inválida. Verifique suas configurações.");
     }
-    if (error.message?.includes("SAFETY")) {
+    if (errorMsg.includes("SAFETY")) {
       throw new Error("A pesquisa foi bloqueada pelos filtros de segurança da IA.");
     }
     throw error;

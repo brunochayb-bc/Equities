@@ -100,30 +100,43 @@ const InfoTooltip = ({ label, align = 'center' }: { label: string, align?: 'left
 const Header = ({ 
   onSearch, 
   onToggleSidebar,
-  isLoading, 
+  isLoading,
+  currentTicker,
 }: { 
   onSearch: (ticker: string) => void,
   onToggleSidebar: () => void,
   isLoading: boolean,
+  currentTicker?: string,
 }) => {
   const [searchInput, setSearchInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[Search] Attempting to search for:", searchInput);
     if (searchInput.trim() && !isLoading) {
-      onSearch(searchInput.toUpperCase().trim());
+      const ticker = searchInput.toUpperCase().trim();
+      console.log(`[Search] Triggering search for ticker: ${ticker}`);
+      onSearch(ticker);
       setSearchInput('');
     }
   };
 
   return (
     <div className="flex items-center px-7 py-5 gap-6 border-b border-border bg-[#0a0c12]">
-      <button 
-        onClick={onToggleSidebar}
-        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-text-3 hover:text-accent"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={onToggleSidebar}
+          className="p-2 hover:bg-white/5 rounded-lg transition-colors text-text-3 hover:text-accent"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="hidden lg:flex flex-col border-l border-border pl-6">
+          <div className="text-[10px] font-black tracking-[0.3em] text-accent uppercase leading-none mb-1">Alpha Intel System</div>
+          <div className="text-[14px] font-black tracking-tight text-white uppercase leading-none">
+            {currentTicker ? `Relatório: ${currentTicker}` : "Inteligência B3"}
+          </div>
+        </div>
+      </div>
       <div className="flex-1 max-w-xl mx-auto">
         <form onSubmit={handleSubmit} className="relative group">
           <input 
@@ -132,16 +145,23 @@ const Header = ({
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             disabled={isLoading}
-            className="w-full pl-11 pr-4 py-3 bg-panel-2 border border-border rounded-xl text-[13px] font-mono tracking-widest text-text placeholder:text-text-3 outline-none focus:border-accent focus:bg-panel transition-all disabled:opacity-50 shadow-xl"
+            className="w-full pl-11 pr-24 py-3 bg-panel-2 border border-border rounded-xl text-[13px] font-mono tracking-widest text-text placeholder:text-text-3 outline-none focus:border-accent focus:bg-panel transition-all disabled:opacity-50 shadow-xl"
           />
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-3 group-focus-within:text-accent transition-colors" />
-          {isLoading ? (
-            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent animate-spin" />
-          ) : (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1 items-center font-mono text-[9px] text-text-3 group-focus-within:opacity-0 transition-opacity">
-               <span className="px-1 border border-border rounded whitespace-nowrap">ENTER</span>
-            </div>
-          )}
+          
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 text-accent animate-spin mr-2" />
+            ) : (
+              <button 
+                type="submit"
+                disabled={!searchInput.trim()}
+                className="bg-accent text-black px-3 py-1.5 rounded-lg text-[10px] font-black tracking-tighter hover:bg-white transition-colors disabled:opacity-30 disabled:hover:bg-accent"
+              >
+                PESQUISAR
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
@@ -1081,6 +1101,7 @@ export default function App() {
                           onSearch={handleSearch} 
                           onToggleSidebar={() => setCollapsed(!collapsed)}
                           isLoading={isLoading} 
+                          currentTicker={data.meta.ticker}
                         />
                         <StockBar data={data} />
                         <HighlightsStrip data={data} />
