@@ -162,3 +162,239 @@ export const PETROBRAS_DATA: CompanyData = {
   },
   "sources": "YAHOO FINANCE · SEC 6-K · INVESTING.COM · MARKETSCREENER"
 };
+
+export const VALE3_DATA: CompanyData = {
+  "meta": {
+    "ticker": "VALE3",
+    "name": "Vale S.A.",
+    "exchange": "B3 / SAO · Mineração · ISIN BRVALEACNOR0",
+    "asOf": "04-05-2026",
+    "currency": "BRL"
+  },
+  "highlights": {
+    "marketCap": "R$ 282,1B",
+    "marketCapHistory": [295.4, 280.2, 285.6, 282.1],
+    "equity": "R$ 188,4B",
+    "netIncome": "R$ 44,2B",
+    "revenue": "R$ 208,5B"
+  },
+  "stock": {
+    "price": "62,45",
+    "change": "-1,12",
+    "changePct": "-1,76",
+    "wk52": "58,12 – 78,90",
+    "marketCap": "R$ 282,1B",
+    "avgVol": "22,50M",
+    "divYield": "14,2%"
+  },
+  "kpis": [
+    {"label":"P/L (TTM)",      "value":"6,12",   "delta":"vs setor 10,5",    "tone":""},
+    {"label":"EV/EBITDA",     "value":"3,85",   "delta":"descontado",       "tone":"pos"},
+    {"label":"ROE (TTM)",     "value":"23,45%", "delta":"▲ estável",         "tone":"pos"},
+    {"label":"DÍVIDA LÍQUIDA","value":"$14,2B", "delta":"▼ controle forte",  "tone":"pos"},
+    {"label":"FCF (FY25)",    "value":"$8,2B",  "delta":"▲ +5% YoY",        "tone":"pos"},
+    {"label":"BETA (5A)",     "value":"0,85",   "delta":"cíclico",          "tone":""}
+  ],
+  "chart": {
+    "title": "DESEMPENHO EM 12 MESES",
+    "subtitle": "BRL · FECHAMENTO DIÁRIO",
+    "yAxis": ["80","70","60","50"],
+    "xAxis": ["MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ","JAN","FEV","MAR","ABR"],
+    "yMin": 55,
+    "yMax": 85,
+    "prices": [72, 70, 68, 65, 66, 64, 67, 69, 65, 63, 64, 62.45],
+    "annotations": [
+      {"index":3, "label":"A · PREÇO MINÉRIO –10%", "above":false},
+      {"index":7, "label":"B · DIVIDENDOS EXTRA", "above":true,  "emphasis":true},
+      {"index":11,"label":"C · ATUAL 62,45", "above":true, "current":true, "emphasis":true}
+    ]
+  },
+  "risk": {
+    "score": 65,
+    "verdict": "COMPRA PARA DIVIDENDOS",
+    "verdictTone": "green",
+    "context": [
+      {"k":"Média do setor",      "v":"58"},
+      {"k":"Δ 90 dias",           "v":"-5 ▼"},
+      {"k":"Confiança",           "v":"MÉDIA"}
+    ]
+  },
+  "valuation": {
+    "summary": "5 ACIMA · 1 ABAIXO",
+    "cards": [
+      {"label":"P/L TTM",      "value":"6,12",  "ctx":"vs global 12,5", "status":"beat"},
+      {"label":"DIV YIELD",    "value":"14,2%", "ctx":"payout robusto", "status":"beat"}
+    ]
+  },
+  "health": {
+    "summary": "4 ACIMA · 2 CAUTELA",
+    "cards": [
+      {"label":"ROE",            "value":"23,45%", "ctx":"excelente", "status":"beat"},
+      {"label":"CAIXA",          "value":"R$ 22B", "ctx":"liquidez alta", "status":"beat"}
+    ]
+  },
+  "growth": {
+    "summary": "2 ACIMA · 4 CAUTELA",
+    "cards": [
+      {"label":"PRODUÇÃO",     "value":"+3%",   "ctx":"dentro do guidance", "status":"caut"},
+      {"label":"FCF",          "value":"$8,2B",  "ctx":"geração resiliente", "status":"beat"}
+    ]
+  },
+  "breakdown": [
+    {"name":"VALUATION",        "weight":35, "score":78, "note":"múltiplos historicamente baixos"},
+    {"name":"SAÚDE FINANCEIRA", "weight":35, "score":65, "note":"alavancagem sob controle"},
+    {"name":"CRESCIMENTO",      "weight":30, "score":45, "note":"dependência da China e minério"}
+  ],
+  "quarterly": {
+    "subtitle": "USD · MILHÕES",
+    "headers": ["4T24","1T25","2T25","3T25","4T25"],
+    "rows": [
+      {"label":"Receita",        "icon":"a", "values":["10,2","9,8","10,5","10,1","9,9"], "qoq":"-2%",   "yoy":"-3%",  "qoqTone":"down","yoyTone":"down"},
+      {"label":"EBITDA",         "icon":"g", "values":["3,5","3,2","3,8","3,6","3,4"],   "qoq":"-5%",   "yoy":"-2%",   "qoqTone":"down","yoyTone":"down"}
+    ]
+  },
+  "earnings": {
+    "title": "RESULTADOS 4T-2025",
+    "date": "REPORTADO 22-02-2026",
+    "rows": [
+      {"k":"Surpresa LPA",    "v":"+1,5%",   "tone":"pos"}
+    ],
+    "narrative": "A Vale reportou lucros resilientes apesar da volatilidade do minério de ferro. O foco continua no retorno de capital aos acionistas."
+  },
+  "delivery": {
+    "title": "OPERACIONAL",
+    "date": "MAR 2026",
+    "items": [
+      "Produção de finos de minério de ferro totalizou <span class=\"num text-green font-semibold mono\">310 Mt</span> em FY25.",
+      "Acordo de Brumadinho <span class=\"num text-green font-semibold mono\">90%</span> executado."
+    ]
+  },
+  "catalysts": [
+    {"h":"Recuperação da China", "d":"Estímulos fiscais podem impulsionar demanda por aço."},
+    {"h":"Yield extraordinário", "d":"Venda de ativos não-core pode gerar dividendos extras."}
+  ],
+  "risks": [
+    {"h":"Preço do Minério", "d":"Abaixo de $90/t impacta severamente as margens."},
+    {"h":"Risco Regulatório", "d":"Novas regras de mineração e taxas ambientais."}
+  ],
+  "verdict": {
+    "rating": "COMPRA",
+    "ratingTone": "green",
+    "ratingPosition": 72,
+    "horizon": "12 MESES",
+    "review": "TRIMESTRAL",
+    "confidence": "ALTA",
+    "text": "Vale continua sendo uma das mineradoras mais eficientes do mundo. O valuation atual oferece uma margem de segurança significativa para investidores focados em renda passiva."
+  },
+  "sources": "YAHOO FINANCE · RI VALE"
+};
+
+export const ITUB4_DATA: CompanyData = {
+  "meta": {
+    "ticker": "ITUB4",
+    "name": "Itaú Unibanco Holding S.A.",
+    "exchange": "B3 / SAO · Bancos · ISIN BRITUBACNPR1",
+    "asOf": "04-05-2026",
+    "currency": "BRL"
+  },
+  "highlights": {
+    "marketCap": "R$ 312,5B",
+    "marketCapHistory": [290.1, 305.4, 310.8, 312.5],
+    "equity": "R$ 178,2B",
+    "netIncome": "R$ 36,4B",
+    "revenue": "R$ 152,8B"
+  },
+  "stock": {
+    "price": "34,80",
+    "change": "+0,25",
+    "changePct": "+0,72",
+    "wk52": "26,15 – 36,90",
+    "marketCap": "R$ 312,5B",
+    "avgVol": "18,40M",
+    "divYield": "6,8%"
+  },
+  "kpis": [
+    {"label":"P/L (TTM)",      "value":"8,58",   "delta":"vs setor 9,2",     "tone":""},
+    {"label":"ROE (TTM)",     "value":"21,1%",  "delta":"▲ superior",        "tone":"pos"},
+    {"label":"ÍNDICE DE BASIL","value":"16,4%",  "delta":"sólido",            "tone":"pos"}
+  ],
+  "chart": {
+    "title": "DESEMPENHO EM 12 MESES",
+    "subtitle": "BRL · FECHAMENTO DIÁRIO",
+    "yAxis": ["36","32","28","24"],
+    "xAxis": ["MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ","JAN","FEV","MAR","ABR"],
+    "yMin": 24,
+    "yMax": 40,
+    "prices": [28, 29, 31, 30, 32, 33, 34, 35, 34, 33.5, 35, 34.8],
+    "annotations": [
+      {"index":11,"label":"ATUAL 34,80", "above":true, "current":true}
+    ]
+  },
+  "risk": {
+    "score": 82,
+    "verdict": "PORTO SEGURO / COMPRA",
+    "verdictTone": "green",
+    "context": [
+      {"k":"Confiança",           "v":"MUITO ALTA"}
+    ]
+  },
+  "valuation": {
+    "summary": "4 ACIMA · 2 ABAIXO",
+    "cards": [
+      {"label":"ROE", "value":"21,1%", "ctx":"Líder vs Bradesco/Santander", "status":"beat"}
+    ]
+  },
+  "health": {
+    "summary": "SÓLIDA",
+    "cards": [
+      {"label":"BASILEIA", "value":"16,4%", "ctx":"Confortável", "status":"beat"}
+    ]
+  },
+  "growth": {
+    "summary": "MODERADA",
+    "cards": [
+      {"label":"LUCRO", "value":"+12%", "ctx":"Crescimento sólido", "status":"beat"}
+    ]
+  },
+  "breakdown": [
+    {"name":"VALUATION", "weight":35, "score":70, "note":"Prêmio justo pela qualidade"},
+    {"name":"SAÚDE", "weight":35, "score":90, "note":"Balanço muito forte"},
+    {"name":"CRESCIMENTO", "weight":30, "score":85, "note":"Digitalização acelerada"}
+  ],
+  "quarterly": {
+    "subtitle": "BRL · BILHÕES",
+    "headers": ["4T24","1T25","2T25","3T25","4T25"],
+    "rows": [
+      {"label":"Lucro Líquido", "icon":"g", "values":["8,8","9,1","9,3","9,5","9,7"], "qoq":"+2%", "yoy":"+10%", "qoqTone":"up", "yoyTone":"up"}
+    ]
+  },
+  "earnings": {
+    "title": "RESULTADOS FY 2025",
+    "date": "FEV 2026",
+    "rows": [],
+    "narrative": "O Itaú Unibanco continua a entregar rentabilidade líder no setor, com ROE acima de 20% mesmo em cenário macro desafiador."
+  },
+  "delivery": {
+    "title": "DIGITAL E CRÉDITO",
+    "date": "2026",
+    "items": [
+      "Expansão da carteira de crédito em <span class=\"num text-green font-semibold mono\">8%</span> com foco em pessoa física de baixo risco."
+    ]
+  },
+  "catalysts": [
+    {"h":"Alta dos Juros", "d":"SELIC elevada favorece margem financeira (NII)."}
+  ],
+  "risks": [
+    {"h":"Inadimplência", "d":"Piora macroeconômica pode elevar provisões."}
+  ],
+  "verdict": {
+    "rating": "FORTE COMPRA",
+    "ratingTone": "green",
+    "ratingPosition": 82,
+    "horizon": "LONG PRAZO",
+    "review": "CONTÍNUO",
+    "confidence": "MÁXIMA",
+    "text": "Melhor banco do Brasil. Estructuralmente rentável."
+  },
+  "sources": "RI ITAÚ"
+};

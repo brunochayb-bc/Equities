@@ -163,6 +163,24 @@ const Header = ({
             )}
           </div>
         </form>
+        <div className="flex gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+          <span className="text-[9px] text-text-3 font-black uppercase tracking-[0.2em] py-1 shrink-0 flex items-center">
+            ACESSO RÁPIDO:
+          </span>
+          {['PETR4', 'VALE3', 'ITUB4'].map(t => (
+            <button 
+              key={t} 
+              onClick={() => onSearch(t)}
+              className="px-2.5 py-1 bg-white/[0.03] border border-white/5 hover:border-accent/40 rounded-md text-[10px] font-mono text-text-3 hover:text-accent transition-all cursor-pointer whitespace-nowrap"
+            >
+              {t}
+            </button>
+          ))}
+          <div className="px-2 py-1 bg-accent/5 rounded-md text-[8px] font-mono text-accent/60 border border-accent/10 whitespace-nowrap flex items-center gap-1">
+             <Info className="w-3 h-3" />
+             Demos sem custo de API
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -203,7 +221,7 @@ const StockBar = ({ data }: { data: CompanyData }) => {
           <div className="flex flex-col md:items-end gap-1 mt-3">
             <div className={`font-mono text-2xl font-black flex items-center gap-2 ${isDown ? 'text-red' : 'text-green'}`}>
               {isDown ? <TrendingDown className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
-              {data.stock.change} ({data.stock.changePct}%)
+              {data.stock.change} ({data.stock.changePct.includes('%') ? data.stock.changePct : `${data.stock.changePct}%`})
             </div>
             <div className="font-mono text-[10px] text-text-3 tracking-[0.2em] font-black uppercase mt-1">
               VARIAÇÃO DIA / ÚLTIMO FECHAMENTO
@@ -1184,7 +1202,7 @@ function buildTextReport(data: CompanyData) {
   lines.push('');
   lines.push(`${data.meta.name}`);
   lines.push(`${data.meta.exchange}`);
-  lines.push(`Preço: ${data.meta.currency} ${data.stock.price} (${data.stock.changePct}%)`);
+  lines.push(`Preço: ${data.meta.currency} ${data.stock.price} (${data.stock.changePct.includes('%') ? data.stock.changePct : `${data.stock.changePct}%`})`);
   lines.push(`52S: ${data.stock.wk52} · Mkt Cap: ${data.highlights.marketCap} · Yield: ${data.stock.divYield}`);
   lines.push(`PL: ${data.highlights.equity} · Lucro: ${data.highlights.netIncome} · Receita: ${data.highlights.revenue}`);
   lines.push('');

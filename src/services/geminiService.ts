@@ -318,6 +318,39 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
   `;
 
   try {
+    const tickerUpper = ticker.toUpperCase();
+
+    // 0. Static Examples (allows use without API key)
+    if (tickerUpper === 'PETR4') {
+        const { PETROBRAS_DATA } = await import('../data');
+        return PETROBRAS_DATA;
+    }
+    if (tickerUpper === 'VALE3') {
+        const { VALE3_DATA } = await import('../data');
+        return VALE3_DATA;
+    }
+    if (tickerUpper === 'ITUB4') {
+        const { ITUB4_DATA } = await import('../data');
+        return ITUB4_DATA;
+    }
+
+    const cacheKey = `ticker_report_${tickerUpper}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        // Basic check to ensure it's valid data
+        if (parsed && parsed.meta && parsed.meta.ticker === ticker.toUpperCase()) {
+          console.log(`[Gemini] Returning cached report for ${ticker}`);
+          return parsed as CompanyData;
+        }
+      } catch (e) {
+        console.warn("Error parsing cached data", e);
+        localStorage.removeItem(cacheKey);
+      }
+    }
+
     const ai = getAI();
     console.log(`[Gemini] Generating report for ticker: ${ticker}...`);
     
@@ -343,6 +376,10 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
     try {
       const parsed = JSON.parse(cleanText) as CompanyData;
       console.log(`[Gemini] Report generated successfully for ${ticker}`);
+      
+      // Save to cache
+      localStorage.setItem(`ticker_report_${ticker.toUpperCase()}`, JSON.stringify(parsed));
+      
       return parsed;
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", cleanText);
@@ -355,7 +392,7 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
     const errorMsg = error.message || "";
     
     if (errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
-      throw new Error("LIMITE DE USO ATINGIDO: Você excedeu a quota gratuita da API Gemini. Aguarde um minuto ou tente novamente mais tarde.");
+      throw new Error("LIMITE DE USO ATINGIDO: Você excedeu a quota gratuita da API Gemini. Aguarde um minuto ou use os 'Exemplos' de acesso rápido. Consultas anteriores ficam salvas em cache local.");
     }
     if (errorMsg.includes("API_KEY_INVALID")) {
       throw new Error("Chave de API inválida. Verifique suas configurações.");
