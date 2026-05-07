@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CompanyData } from "../types";
+import { PETROBRAS_DATA, VALE3_DATA, ITUB4_DATA } from "../data";
 
 let aiInstance: GoogleGenAI | null = null;
 
@@ -319,19 +320,23 @@ export async function getCompanyReport(ticker: string): Promise<CompanyData> {
 
   try {
     const tickerUpper = ticker.toUpperCase();
+    console.log(`[GeminiService] Ticker requested: ${tickerUpper}`);
 
     // 0. Static Examples (allows use without API key)
-    if (tickerUpper === 'PETR4') {
-        const { PETROBRAS_DATA } = await import('../data');
-        return PETROBRAS_DATA;
+    if (tickerUpper === 'PETR4' || tickerUpper === 'PETR3') {
+        console.log("[GeminiService] Returning PETROBRAS_DATA");
+        if (!PETROBRAS_DATA) throw new Error("Erro interno: PETROBRAS_DATA não encontrado.");
+        return { ...PETROBRAS_DATA, meta: { ...PETROBRAS_DATA.meta, ticker: tickerUpper } };
     }
     if (tickerUpper === 'VALE3') {
-        const { VALE3_DATA } = await import('../data');
-        return VALE3_DATA;
+        console.log("[GeminiService] Returning VALE3_DATA");
+        if (!VALE3_DATA) throw new Error("Erro interno: VALE3_DATA não encontrado.");
+        return { ...VALE3_DATA };
     }
     if (tickerUpper === 'ITUB4') {
-        const { ITUB4_DATA } = await import('../data');
-        return ITUB4_DATA;
+        console.log("[GeminiService] Returning ITUB4_DATA");
+        if (!ITUB4_DATA) throw new Error("Erro interno: ITUB4_DATA não encontrado.");
+        return { ...ITUB4_DATA };
     }
 
     const cacheKey = `ticker_report_${tickerUpper}`;

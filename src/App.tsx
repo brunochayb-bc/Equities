@@ -1035,11 +1035,21 @@ export default function App() {
   };
 
   const handleSearch = async (ticker: string) => {
+    if (!ticker) return;
+    
     setActiveView('research');
     setIsLoading(true);
     setError(null);
+    
+    // Add artificial delay for immediate static data to show loading state
+    const delay = new Promise(resolve => setTimeout(resolve, 800));
+    
     try {
-      const report = await getCompanyReport(ticker);
+      const [report] = await Promise.all([
+        getCompanyReport(ticker),
+        delay
+      ]);
+      
       setData(report);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
