@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   TrendingUp, 
@@ -56,47 +56,79 @@ const Sparkline = ({ data, color = "#c9ff3d" }: { data: number[], color?: string
   );
 };
 
+// ✅ CORREÇÃO: InfoTooltip agora usa portal via estado para evitar corte por overflow-hidden
 const InfoTooltip = ({ label, align = 'center' }: { label: string, align?: 'left' | 'right' | 'center' }) => {
   const info = GLOSSARY[label.toUpperCase()] || GLOSSARY[label] || null;
   if (!info) return null;
 
-  const alignClasses = {
-    left: 'left-0 translate-x-0',
-    right: 'right-0 translate-x-0',
-    center: 'left-1/2 -translate-x-1/2'
+  const [visible, setVisible] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const iconRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    if (!iconRef.current) return;
+    const rect = iconRef.current.getBoundingClientRect();
+    const tooltipWidth = 320;
+    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+    if (align === 'left') left = rect.left;
+    if (align === 'right') left = rect.right - tooltipWidth;
+    // Clamp to viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - tooltipWidth - 8));
+    setPos({
+      top: rect.top - 8, // will be shifted up by transform
+      left,
+    });
+    setVisible(true);
   };
 
-  const arrowClasses = {
-    left: 'left-4 translate-x-0',
-    right: 'right-4 translate-x-0',
-    center: 'left-1/2 -translate-x-1/2'
-  };
+  const handleMouseLeave = () => setVisible(false);
 
   return (
-    <div className="group/tooltip relative inline-block ml-1.5 align-middle">
-      <div className="p-1 -m-1 cursor-help">
-        <Info className="w-3.5 h-3.5 text-text-3 group-hover/tooltip:text-accent transition-colors" />
+    <div
+      className="relative inline-block ml-1.5 align-middle"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div ref={iconRef} className="p-1 -m-1 cursor-help">
+        <Info className="w-3.5 h-3.5 text-text-3 hover:text-accent transition-colors" />
       </div>
-      <div className={`absolute invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 z-[110] bottom-full ${alignClasses[align]} mb-3 w-80 p-5 bg-[#0a0c10] border border-accent/40 rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,1)] ring-1 ring-white/10 pointer-events-none`}>
-        <div className="text-[10px] text-accent font-black tracking-[0.25em] mb-3 uppercase border-b border-accent/20 pb-2.5 flex justify-between items-center">
-          {info.label}
-          <span className="text-[8px] bg-accent text-bg px-2 py-0.5 rounded-sm font-black">INTEL DEF</span>
-        </div>
-        <div className="text-[13.5px] text-white leading-relaxed font-semibold mb-4">{info.desc}</div>
-        {info.calc && (
-          <div className="pt-3.5 border-t border-white/10">
-            <div className="text-[9px] text-text-3 font-black uppercase mb-2 tracking-wider">Metodologia de Cálculo:</div>
-            <div className="font-mono text-[11px] text-accent/90 bg-black/60 p-3 rounded-xl border border-white/5 leading-relaxed">
-              {info.calc}
+
+      {visible && (
+        <div
+          style={{
+            position: 'fixed',
+            top: pos.top,
+            left: pos.left,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+            width: 320,
+            pointerEvents: 'none',
+          }}
+        >
+          <div className="p-5 bg-[#0a0c10] border border-accent/40 rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,1)] ring-1 ring-white/10">
+            <div className="text-[10px] text-accent font-black tracking-[0.25em] mb-3 uppercase border-b border-accent/20 pb-2.5 flex justify-between items-center">
+              {info.label}
+              <span className="text-[8px] bg-accent text-bg px-2 py-0.5 rounded-sm font-black">INTEL DEF</span>
             </div>
+            <div className="text-[13.5px] text-white leading-relaxed font-semibold mb-4">{info.desc}</div>
+            {info.calc && (
+              <div className="pt-3.5 border-t border-white/10">
+                <div className="text-[9px] text-text-3 font-black uppercase mb-2 tracking-wider">Metodologia de Cálculo:</div>
+                <div className="font-mono text-[11px] text-accent/90 bg-black/60 p-3 rounded-xl border border-white/5 leading-relaxed">
+                  {info.calc}
+                </div>
+              </div>
+            )}
+            {/* Arrow */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-accent/40" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[calc(100%-1px)] w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-[#0a0c10]" />
           </div>
-        )}
-        <div className={`absolute top-full ${arrowClasses[align]} -mt-[0.5px] w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-accent/40`} />
-        <div className={`absolute top-full ${arrowClasses[align]} -mt-[1.5px] w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[9px] border-t-[#0a0c10]`} />
-      </div>
+        </div>
+      )}
     </div>
   );
 };
+
 const Header = ({ 
   onSearch, 
   onToggleSidebar,
@@ -112,10 +144,8 @@ const Header = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("[Search] Attempting to search for:", searchInput);
     if (searchInput.trim() && !isLoading) {
       const ticker = searchInput.toUpperCase().trim();
-      console.log(`[Search] Triggering search for ticker: ${ticker}`);
       onSearch(ticker);
       setSearchInput('');
     }
@@ -185,7 +215,6 @@ const Header = ({
     </div>
   );
 };
-;
 
 const StockBar = ({ data }: { data: CompanyData }) => {
   const isDown = isNeg(data.stock.change);
@@ -236,13 +265,10 @@ const StockBar = ({ data }: { data: CompanyData }) => {
 const SecondaryMetrics = ({ data }: { data: CompanyData }) => {
   const parseNum = (s: string) => {
     if (!s) return 0;
-    // Handle both formats: 1.234,56 and 1,234.56 or 41,24
     const cleaned = s.replace(/[^\d,.-]/g, '');
     if (cleaned.includes(',') && cleaned.includes('.')) {
-      // Likely 1.234,56
       return parseFloat(cleaned.replace(/\./g, '').replace(',', '.'));
     } else if (cleaned.includes(',')) {
-      // Likely 41,24
       return parseFloat(cleaned.replace(',', '.'));
     }
     return parseFloat(cleaned);
@@ -270,10 +296,7 @@ const SecondaryMetrics = ({ data }: { data: CompanyData }) => {
             rangeUI = (
               <div className="w-full mt-3">
                 <div className="h-1.5 w-full bg-white/5 rounded-full relative">
-                  {/* Background Gradient Bar */}
                   <div className="absolute inset-0 bg-linear-to-r from-red-500/20 via-yellow-500/20 to-green-500/20 rounded-full border border-white/5" />
-                  
-                  {/* Current Position Marker */}
                   <motion.div 
                     initial={{ left: 0 }}
                     animate={{ left: `${clampedPercent}%` }}
@@ -431,12 +454,10 @@ const PriceChart = ({ data }: { data: CompanyData }) => {
             </linearGradient>
             </defs>
             
-            {/* Grid */}
             <g stroke="rgba(255,255,255,0.06)">
             {[0, 1, 2, 3].map(i => <line key={i} x1="50" y1={40 + i * 60} x2="740" y2={40 + i * 60} />)}
             </g>
             
-            {/* Labels */}
             <g className="font-mono text-[10px] fill-text-3 font-semibold pointer-events-none">
             {c.yAxis?.map((v, i) => <text key={i} x="40" y={44 + i * 60} textAnchor="end">{v}</text>)}
             {c.xAxis?.map((m, i) => (
@@ -444,7 +465,6 @@ const PriceChart = ({ data }: { data: CompanyData }) => {
             ))}
             </g>
             
-            {/* Hover Guide */}
             {hoverIndex !== null && (
                 <line 
                     x1={pts[hoverIndex].x} y1="30" 
@@ -471,7 +491,6 @@ const PriceChart = ({ data }: { data: CompanyData }) => {
             className="pointer-events-none"
             />
             
-            {/* Interactive Areas for Hover */}
             {pts.map((p, i) => (
                 <rect 
                     key={i}
@@ -481,11 +500,9 @@ const PriceChart = ({ data }: { data: CompanyData }) => {
                 />
             ))}
 
-            {/* Annotations */}
             {c.annotations?.map((a, i) => {
             const p = pts[a.index];
             if (!p) return null;
-            const isNearBottom = p.y > 150;
             const lineY = a.above ? p.y - 40 : p.y + 40;
             const textY = a.above ? p.y - 45 : p.y + 55;
             const nearRight = p.x > 620;
@@ -681,10 +698,7 @@ const BreakdownSection = ({ data }: { data: CompanyData }) => (
   </div>
 );
 
-// --- Page 2 Components ---
-
 const QuarterlyTable = ({ data }: { data: CompanyData }) => {
-  // CLONE AND REVERSE DATA TO SHOW MOST RECENT FIRST
   const reversedHeaders = useMemo(() => [...data.quarterly.headers].reverse(), [data.quarterly.headers]);
   const reversedRows = useMemo(() => data.quarterly.rows.map(r => ({
      ...r,
@@ -852,7 +866,7 @@ const CatalystsVsRisks = ({ data }: { data: CompanyData }) => (
 
 const BottomLine = ({ data }: { data: CompanyData }) => {
   const v = data.verdict;
-  const seg = Math.min(4, Math.floor(v.ratingPosition / 20.01)); // Precision fix for 100
+  const seg = Math.min(4, Math.floor(v.ratingPosition / 20.01));
   const ratingColor = v.ratingTone === 'green' ? 'text-green' : v.ratingTone === 'red' ? 'text-red' : v.ratingTone === 'amber' ? 'text-amber' : 'text-blue';
   
   return (
@@ -948,7 +962,7 @@ const Footer = ({ text }: { text: string }) => (
   </div>
 );
 
-// --- Main Component ---
+// --- Sidebar ---
 
 const SidebarItem = ({ icon: Icon, label, active, collapsed, onClick }: any) => (
   <button 
@@ -964,6 +978,7 @@ const SidebarItem = ({ icon: Icon, label, active, collapsed, onClick }: any) => 
   </button>
 );
 
+// ✅ CORREÇÃO: Logo aumentada — de text-[14px] para text-[22px], com ícone de gráfico e layout mais impactante
 const Sidebar = ({ activeView, setActiveView, collapsed, setCollapsed }: any) => {
   return (
     <motion.div 
@@ -971,19 +986,36 @@ const Sidebar = ({ activeView, setActiveView, collapsed, setCollapsed }: any) =>
       animate={{ width: collapsed ? 80 : 280 }}
       className="h-screen bg-[#05070a] border-r border-border flex flex-col sticky top-0 z-50 transition-all"
     >
-      <div className="p-6 flex items-center justify-between">
+      <div className="p-5 flex items-center justify-between border-b border-border/40 min-h-[80px]">
         {!collapsed && (
           <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-0.5 overflow-hidden"
+          >
+            {/* ✅ Logo principal: tamanho aumentado para 22px, em destaque */}
+            <div className="text-accent font-mono text-[22px] font-black tracking-tight uppercase leading-none">
+              Alpha Intel
+            </div>
+            {/* Subtítulo menor abaixo */}
+            <div className="text-text-3 font-mono text-[9px] font-bold tracking-[0.3em] uppercase leading-none mt-1">
+              Investment Management
+            </div>
+          </motion.div>
+        )}
+        {collapsed && (
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-accent font-mono text-[14px] font-black tracking-[0.3em] uppercase"
+            className="mx-auto text-accent font-mono text-[18px] font-black"
           >
-            Investment Management
+            AI
           </motion.div>
         )}
         <button 
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 hover:bg-white/5 rounded-lg text-text-3 transition-colors ml-auto"
+          className="p-2 hover:bg-white/5 rounded-lg text-text-3 transition-colors ml-auto flex-shrink-0"
         >
           {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -1041,7 +1073,6 @@ export default function App() {
     setIsLoading(true);
     setError(null);
     
-    // Add artificial delay for immediate static data to show loading state
     const delay = new Promise(resolve => setTimeout(resolve, 800));
     
     try {
